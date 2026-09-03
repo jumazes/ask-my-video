@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Q&amp;A</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M8 5v14l11-7z" fill="currentColor" />
+        </svg>
+      </div>
+      <div>
+        <h1>Video Q&amp;A</h1>
+        <p class="subtitle">Ask questions about any YouTube video or podcast</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" id="ingest-panel">
+        <h2><span class="step">1</span>Ingest a video</h2>
+
+        <div class="row">
+          <input type="text" id="url-input" placeholder="Paste a YouTube link..." />
+          <button id="ingest-btn"><span>Ingest</span></button>
+        </div>
+        <p id="ingest-status" class="status"></p>
+
+        <div class="divider"><span>or continue with one you already added</span></div>
+
+        <div class="row">
+          <select id="video-select">
+            <option value="">Choose an already-ingested video</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="panel" id="chat-panel">
+        <h2><span class="step">2</span>Ask questions</h2>
+
+        <div id="now-playing" class="now-playing" hidden>
+          <img id="now-playing-thumb" alt="" />
+          <div class="now-playing-info">
+            <span class="now-playing-label">Asking about</span>
+            <span id="now-playing-title"></span>
+          </div>
+        </div>
+
+        <div id="chat-log">
+          <p class="empty-state">Ingest or pick a video above, then ask away.</p>
+        </div>
+
+        <div class="row">
+          <input type="text" id="question-input" placeholder="Ask something about the video..." disabled />
+          <button id="ask-btn" disabled><span>Send</span></button>
+        </div>
+      </section>
+    </main>
+
+    <footer>Retrieval-augmented Q&amp;A &middot; transcript chunks + Gemini</footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
