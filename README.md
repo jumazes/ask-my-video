@@ -10,12 +10,13 @@ pinned: false
 
 # YouTube / Podcast RAG Chatbot
 
-A weekend project: paste a YouTube video/podcast link, ask questions about it,
-get answers grounded in the actual transcript (with timestamp citations).
+A retrieval-augmented generation (RAG) chatbot that answers questions about
+YouTube videos and podcasts, with responses grounded in the actual
+transcript and cited by timestamp.
 
-Built as a learning project for understanding RAG (retrieval-augmented
-generation) - every step of the pipeline is a plain, readable function rather
-than something hidden inside a framework.
+The pipeline favors clarity over abstraction: transcript ingestion,
+chunking, embedding, retrieval, and generation are each implemented as
+plain, readable functions rather than hidden behind a framework.
 
 ## How it works
 
@@ -113,9 +114,9 @@ runs this Dockerfile directly, no extra setup needed on their side.
 
 - Only works for videos that have captions (manual or auto-generated).
 - English is preferred; falls back to whatever transcript is available.
-- No auth - anyone with the deployed link can use it (and burn through
-  the free Gemini quota). Fine for sharing with friends; not meant for
-  a public audience.
+- No authentication - anyone with the deployed link can use it, sharing
+  the same Gemini free-tier quota. Suitable for small-scale personal use,
+  not for public traffic.
 - No conversation memory - each question is answered independently.
 - **Nothing persists to disk, by design.** Ingested videos live only in
   the server process's memory - restart the server (or the machine) and
