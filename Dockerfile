@@ -2,6 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install the CPU-only torch build explicitly. Plain "pip install torch" on
+# Linux pulls in CUDA runtime libraries (several hundred MB to 1GB+) that
+# are useless without a GPU and were blowing past the 512MB RAM limit on
+# Render's free instance. Installing this first means sentence-transformers'
+# own torch dependency (in requirements.txt) is already satisfied.
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

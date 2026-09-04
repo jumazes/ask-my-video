@@ -30,6 +30,12 @@ class _VideoEntry:
 
 _videos: dict[str, _VideoEntry] = {}
 
+# Caps how many videos accumulate in RAM at once. There's no disk backing
+# (see module docstring), so without a cap this would grow for as long as
+# the process stays up - a real risk on a small, memory-limited host if a
+# few people each ingest a different video in the same running instance.
+_MAX_VIDEOS = 5
+
 
 def video_exists(video_id: str) -> bool:
     return video_id in _videos
@@ -38,6 +44,10 @@ def video_exists(video_id: str) -> bool:
 def save_video(
     video_id: str, title: Optional[str], chunks: list[Chunk], embeddings: np.ndarray
 ) -> None:
+    if video_id not in _videos and len(_videos) >= _MAX_VIDEOS:
+        oldest_id = next(iter(_videos))
+        del _videos[oldest_id]
+
     _videos[video_id] = _VideoEntry(
         title=title,
         chunks=chunks,

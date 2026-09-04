@@ -10,11 +10,23 @@ First run downloads the model (~90MB) from Hugging Face; cached after that.
 from typing import Optional
 
 import numpy as np
+import torch
 from sentence_transformers import SentenceTransformer
 
 from . import config
 
+# Keeps PyTorch's intra-op thread pool (and its per-thread working buffers)
+# from scaling up with the host's CPU count - matters on small, memory-
+# capped hosting instances more than it matters for raw speed here.
+torch.set_num_threads(1)
+
 _model: Optional[SentenceTransformer] = None
+
+# Small encode batches cap the peak memory PyTorch allocates per call.
+# PyTorch's allocator doesn't hand freed memory back to the OS, so this
+# peak effectively becomes the process's new memory floor - worth keeping
+# low on a memory-constrained host even though it's not the fastest option.
+_ENCODE_BATCH_SIZE = 8
 
 
 def get_embedder() -> SentenceTransformer:
@@ -34,7 +46,7 @@ def embed_texts(texts: list[str]) -> np.ndarray:
     instead of the full cosine formula - same result, cheaper to compute.
     """
     model = get_embedder()
-    return model.encode(texts, normalize_embeddings=True)
+    return model.encode(texts, normalize_embeddings=True, batch_size=_ENCODE_BATCH_SIZE)
 
 
 def embed_query(text: str) -> np.ndarray:
