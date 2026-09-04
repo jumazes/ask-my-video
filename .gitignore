@@ -3,3 +3,12 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+
+# PyInstaller build output (desktop app)
+build/
+build2/
+build_final/
+dist/
+dist2/
+dist_final/
+*.spec

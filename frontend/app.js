@@ -3,12 +3,13 @@
 // user/model text) so nothing typed or generated can be run as HTML.
 
 let currentVideoId = null;
+let videos = [];
 
 const urlInput = document.getElementById("url-input");
 const ingestBtn = document.getElementById("ingest-btn");
 const ingestStatus = document.getElementById("ingest-status");
-const videoSelect = document.getElementById("video-select");
-const nowPlaying = document.getElementById("now-playing");
+const videoListEl = document.getElementById("video-list");
+const chatHeader = document.getElementById("chat-header");
 const nowPlayingThumb = document.getElementById("now-playing-thumb");
 const nowPlayingTitle = document.getElementById("now-playing-title");
 const chatLog = document.getElementById("chat-log");
@@ -21,27 +22,49 @@ function thumbnailUrl(videoId) {
 
 async function loadVideoList(selectVideoId) {
   const res = await fetch("/api/videos");
-  const videos = await res.json();
-
-  videoSelect.innerHTML = "";
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = "Choose an already-ingested video";
-  videoSelect.appendChild(placeholder);
-
-  for (const v of videos) {
-    const option = document.createElement("option");
-    option.value = v.video_id;
-    option.textContent = `${v.title || v.video_id} (${v.num_chunks} chunks)`;
-    option.dataset.title = v.title || v.video_id;
-    videoSelect.appendChild(option);
-  }
+  videos = await res.json();
+  renderVideoList();
 
   const target = selectVideoId || currentVideoId;
   const match = videos.find((v) => v.video_id === target);
   if (match) {
-    videoSelect.value = target;
     setCurrentVideo(match.video_id, match.title);
+  }
+}
+
+function renderVideoList() {
+  videoListEl.replaceChildren();
+
+  if (videos.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state small";
+    empty.textContent = "No videos yet.";
+    videoListEl.appendChild(empty);
+    return;
+  }
+
+  for (const v of videos) {
+    const item = document.createElement("button");
+    item.className = "video-item" + (v.video_id === currentVideoId ? " active" : "");
+    item.type = "button";
+
+    const thumb = document.createElement("img");
+    thumb.src = thumbnailUrl(v.video_id);
+    thumb.alt = "";
+    item.appendChild(thumb);
+
+    const title = document.createElement("span");
+    title.className = "video-item-title";
+    title.textContent = v.title || v.video_id;
+    item.appendChild(title);
+
+    item.addEventListener("click", () => {
+      if (v.video_id === currentVideoId) return;
+      setCurrentVideo(v.video_id, v.title);
+      resetChatLog("Ask away.");
+    });
+
+    videoListEl.appendChild(item);
   }
 }
 
@@ -50,10 +73,12 @@ function setCurrentVideo(videoId, title) {
 
   nowPlayingThumb.src = thumbnailUrl(videoId);
   nowPlayingTitle.textContent = title || videoId;
-  nowPlaying.hidden = false;
+  chatHeader.hidden = false;
 
   questionInput.disabled = false;
   askBtn.disabled = false;
+
+  renderVideoList();
 }
 
 function setStatus(el, message, isError) {
@@ -81,7 +106,7 @@ async function ingestVideo() {
       return;
     }
 
-    setStatus(ingestStatus, `Ready: "${data.title || data.video_id}" (${data.num_chunks} chunks).`, false);
+    setStatus(ingestStatus, `Ready: "${data.title || data.video_id}".`, false);
     urlInput.value = "";
     await loadVideoList(data.video_id);
   } catch (err) {
@@ -235,14 +260,6 @@ async function askQuestion() {
 ingestBtn.addEventListener("click", ingestVideo);
 urlInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") ingestVideo();
-});
-
-videoSelect.addEventListener("change", () => {
-  const videoId = videoSelect.value;
-  if (!videoId) return;
-  const title = videoSelect.options[videoSelect.selectedIndex].dataset.title;
-  setCurrentVideo(videoId, title);
-  resetChatLog("Ask away.");
 });
 
 askBtn.addEventListener("click", askQuestion);

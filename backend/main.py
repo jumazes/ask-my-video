@@ -2,7 +2,9 @@
 endpoints, and serves the frontend.
 """
 
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +27,15 @@ from .youtube_ingest import (
     extract_video_id,
     fetch_transcript,
 )
+
+
+def _resource_path(relative: str) -> str:
+    """Resolves a path relative to the project root - or, when running
+    inside a PyInstaller-bundled exe, relative to the bundle's data
+    directory (sys._MEIPASS), since bundled data isn't at the same
+    relative path as it is when running from source."""
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
+    return str(base / relative)
 
 
 @asynccontextmanager
@@ -104,4 +115,4 @@ def ask(req: AskRequest):
 
 # Must be registered after the /api/* routes above - a root static mount
 # would otherwise intercept every path, including API routes.
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+app.mount("/", StaticFiles(directory=_resource_path("frontend"), html=True), name="frontend")

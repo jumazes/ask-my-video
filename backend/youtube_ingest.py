@@ -157,7 +157,17 @@ def fetch_transcript(
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
     except DownloadError as e:
-        raise TranscriptUnavailableError(video_id, "unavailable_video", str(e))
+        message = str(e)
+        if "Sign in to confirm you" in message or "not a bot" in message:
+            raise TranscriptUnavailableError(
+                video_id,
+                "blocked",
+                "YouTube is currently blocking automated requests from this "
+                "server's IP address. This is a known limitation of free/shared "
+                "hosting, not specific to this video - try the desktop app "
+                "instead, which runs on your own machine and isn't affected.",
+            )
+        raise TranscriptUnavailableError(video_id, "unavailable_video", message)
 
     title = info.get("title")
     manual = info.get("subtitles") or {}
