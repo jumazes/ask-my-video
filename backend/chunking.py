@@ -101,7 +101,7 @@ if __name__ == "__main__":
     from .youtube_ingest import extract_video_id, fetch_transcript
 
     vid = extract_video_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    segments, lang = fetch_transcript(vid)
+    segments, lang, _title = fetch_transcript(vid)
     chunks = chunk_transcript(segments, vid)
     print(f"{len(segments)} segments -> {len(chunks)} chunks")
     for c in chunks[:3]:

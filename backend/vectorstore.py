@@ -91,14 +91,14 @@ if __name__ == "__main__":
     # Smoke test: python -m backend.vectorstore
     from .chunking import chunk_transcript
     from .embeddings import embed_query, embed_texts
-    from .youtube_ingest import extract_video_id, fetch_transcript, fetch_video_title
+    from .youtube_ingest import extract_video_id, fetch_transcript
 
     vid = extract_video_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    segments, _ = fetch_transcript(vid)
+    segments, _lang, title = fetch_transcript(vid)
     chunks = chunk_transcript(segments, vid)
     vectors = embed_texts([c.text for c in chunks])
 
-    save_video(vid, fetch_video_title(vid), chunks, vectors)
+    save_video(vid, title, chunks, vectors)
     print(f"saved {len(chunks)} chunks for {vid} (in-memory)")
 
     loaded_chunks, loaded_vectors = load_video(vid)

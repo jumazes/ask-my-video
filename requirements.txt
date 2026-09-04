@@ -3,6 +3,6 @@ uvicorn[standard]
 google-genai
 sentence-transformers
 numpy
-youtube-transcript-api
+yt-dlp
 python-dotenv
 requests

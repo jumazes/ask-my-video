@@ -24,7 +24,6 @@ from .youtube_ingest import (
     TranscriptUnavailableError,
     extract_video_id,
     fetch_transcript,
-    fetch_video_title,
 )
 
 
@@ -68,7 +67,7 @@ def ingest(req: IngestRequest):
             )
 
     try:
-        segments, _language = fetch_transcript(video_id)
+        segments, _language, title = fetch_transcript(video_id)
     except TranscriptUnavailableError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -79,7 +78,6 @@ def ingest(req: IngestRequest):
         overlap_words=config.CHUNK_OVERLAP_WORDS,
     )
     embeddings = embed_texts([c.text for c in chunks])
-    title = fetch_video_title(video_id)
     vectorstore.save_video(video_id, title, chunks, embeddings)
 
     return IngestResponse(video_id=video_id, title=title, num_chunks=len(chunks))
