@@ -1,13 +1,3 @@
----
-title: Video Q&A
-emoji: 🎬
-colorFrom: indigo
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # YouTube / Podcast RAG Chatbot
 
 A retrieval-augmented generation (RAG) chatbot that answers questions about
@@ -89,26 +79,27 @@ click Ingest, then ask questions in the chat box below.
 
 API docs (Swagger UI) are at http://127.0.0.1:8000/docs.
 
-## Deploy (Hugging Face Spaces)
+## Deploy (Render)
 
-The `Dockerfile` and the YAML block at the top of this README are Hugging
-Face Spaces config (`sdk: docker`, `app_port: 7860`) - Spaces builds and
-runs this Dockerfile directly, no extra setup needed on their side.
+The `Dockerfile` at the repo root is a standard Docker web service - Render
+builds and runs it directly. The container reads the port to bind to from
+the `PORT` environment variable Render injects at runtime.
 
-1. Create a new Space at https://huggingface.co/new-space - pick the
-   **Docker** SDK, any name/visibility.
-2. Push this repo to the Space's git remote (shown on the Space's page,
-   looks like `https://huggingface.co/spaces/<user>/<space-name>`):
-   ```
-   git remote add space https://huggingface.co/spaces/<user>/<space-name>
-   git push space master
-   ```
-3. In the Space's **Settings -> Variables and secrets**, add a secret
-   named `GEMINI_API_KEY` with your key. Never commit it - `.env` is
-   gitignored and the Dockerfile only copies `backend/`, `frontend/`,
-   and `requirements.txt`, so it can't leak in even by accident.
-4. The Space builds (a few minutes - it's downloading/installing torch)
-   and then serves the app at `https://<user>-<space-name>.hf.space`.
+1. Create a free account at https://render.com (no credit card required)
+   and connect your GitHub account.
+2. **New -> Web Service**, pick this repository. Render should detect the
+   `Dockerfile` automatically; if asked, set the runtime/environment to
+   **Docker**.
+3. Choose the **Free** instance type.
+4. Under **Environment**, add an environment variable named
+   `GEMINI_API_KEY` with your key. Never commit it - it stays out of the
+   image entirely (`.env` is gitignored and the Dockerfile only copies
+   `backend/`, `frontend/`, and `requirements.txt`).
+5. Deploy. The first build takes a few minutes (installing torch); Render
+   then serves the app at `https://<service-name>.onrender.com`.
+
+Free-tier note: the service spins down after 15 minutes of inactivity, so
+the first request after a while takes a bit longer to wake it back up.
 
 ## Known limitations
 
